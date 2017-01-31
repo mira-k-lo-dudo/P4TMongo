@@ -1,7 +1,7 @@
 P4TMongo
 ========
 
-P4TMongo is a PHP Class that mimics the popular AdoDB PHP Library. Use your favorite getOne, getRow, getAll, getCol and other commands with MongoDB.
+P4TMongo is a PHP Class that mimics the popular AdoDB PHP Library and new PDO Library. Use your favorite getOne (fetchColumn), getRow (fetch), getAll (fetchAll), insert (query) and other commands with MongoDB.
 
 ## Prerequisites
 
@@ -30,28 +30,28 @@ And then you can start using your favorite AdoDB functions with MongoDB right ou
                             'Gender' => 'male'
                         );
 
-        //getOne returns one value
-        $value = $db->getOne('myTestCollection', 'columnIWantToTakeValueFrom', $filter);
+        //getOne (AdoDB) and fetchColumn (PDO)  returns one value
+        $value = $db->getOne('myTestCollection', 'columnIWantToTakeValueFrom', $filter); // like AdoDB
+        $value = $db->fetchColumn('myTestCollection', 'columnIWantToTakeValueFrom', $filter); // like PDO
+                
+        //getRow (AdoDB) and fetch (PDO) returns one row
+        $row = $db->getRow('myTestCollection', $filter); // like AdoDB
+        $row = $db->fetch('myTestCollection', $filter); // like PDO
         
-        //getCol returns one column
-        $column = $db->getCol('myTestCollection', 'columnIWantReturned', $filter);
-        
-        //getRow returns one row
-        $row = $db->getRow('myTestCollection', $filter);
-        
-        //getAll returns all rows
-        $allDataInCollection = $db->getAll('myTestCollection', $filter);
+        //getAll (AdoDB) and fetchAll (PDO) returns all rows
+        $allDataInCollection = $db->getAll('myTestCollection', $filter); // like AdoDB
+        $allDataInCollection = $db->fetchAll('myTestCollection', $filter); // like PDO
         ...
     ?>
     
 Supported getters are:
 
-* getOne()
-* getOneByID()
+* getOne() // fetchColumn()
+* getOneByID() // fetchColumnByID()
 * getCol()
-* getRow()
-* getRowByID()
-* getAll()
+* getRow() // fetch()
+* getRowByID() // fetchByID()
+* getAll() // fetchAll()
 * getAssoc()
     
 How about inserting data?
@@ -64,7 +64,8 @@ How about inserting data?
                         'Age' => 30
                     );
                     
-        $db->insert('myTestCollection', $record);
+        $db->insert('myTestCollection', $record); // like AdoDB
+        $db->query('myTestCollection', $record); // like PDO
         ...
     ?>
     

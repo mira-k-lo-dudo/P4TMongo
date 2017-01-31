@@ -1,4 +1,4 @@
-<?
+<?php
     /***
      *
      *  P4TMongo is a PHP Class that mimics the popular AdoDB PHP Library. 
@@ -39,6 +39,11 @@
          *
          *  @return mixed       
          ***/
+
+        public function fetchColumn($collection, $column, Array $filter=array(), Array $order=array(), $slaveOkay=true){
+        		return $this->getOne($collection, $column, $filter,$order, $slaveOkay);
+        }
+
         public function getOne($collection, $column, Array $filter=array(), Array $order=array(), $slaveOkay=true){
             //get all burning items from the queue
             $cursor = $this->db->$collection->find($filter);  //SELECT * FROM $collection WHERE ^^^            
@@ -51,7 +56,6 @@
                 $cursor->sort($order);  //ORDER BY $order ASC
             }
             $cursor->limit(1);          //LIMIT 1  
-
             $this->debug('<span style="color:#0A0;">getOne</span> from '.$collection.', column '.$column.', filter:<br />'.print_r($filter, true).'Order By:<br />'.print_r($order,true));
             
             foreach($cursor as $obj){                
@@ -73,8 +77,15 @@
          *
          *  @return mixed
          ***/
+
+
+
         public function getOneByID($collection, $column, $id){
             return $this->getOne($collection, $column, array('_id' => new MongoId($id)));
+        }
+
+        public function fetchColumnByID($collection, $column, $id) {
+          return $this->getOne($collection, $column, array('_id' => new MongoId($id)));
         }
         
         
@@ -87,6 +98,10 @@
          *
          *  @return array of arrays
          ***/
+        public function fetchAll($collection, Array $filter=array(), Array $order=array(), $start=null, $offset=null, $slaveOkay=true){
+        	 return $this->getAll($collection, $filter, $order, $start, $offset, $slaveOkay);
+        	}
+
         public function getAll($collection, Array $filter=array(), Array $order=array(), $start=null, $offset=null, $slaveOkay=true){
             $cursor = $this->db->$collection->find($filter)->limit((int)$start)->skip((int)$offset);  //SELECT * FROM $collection WHERE ^^^            
             
@@ -97,7 +112,6 @@
             if($order){
                 $cursor->sort($order);  //ORDER BY $order ASC
             }           
-
             //limit x,y            
             /*
             if($start){
@@ -132,6 +146,9 @@
          *
          *  @return array representing a columnt from a collection
          ***/
+
+       
+
         public function getColumn($collection, $column, Array $filter=array(), Array $order=array(), $start=null, $offset=null){
             $result = $this->getAll($collection, $filter, $order, $start, $offset);
             $return = array();
@@ -166,6 +183,12 @@
          *
          *  @return array representing one document (however complex it may be)
          ***/
+
+         public function fetch($collection, Array $filter=array(), Array $order=array(), $slaveOkay=true){
+        		return $this->getRow($collection,$filter, $order, $slaveOkay);
+
+        }
+
         public function getRow($collection, Array $filter=array(), Array $order=array(), $slaveOkay=true){
             $result = $this->getAll($collection, $filter, $order, 1, null, $slaveOkay);
             foreach($result as $obj){
@@ -183,10 +206,15 @@
          *
          *  @return array representing one document (however complex it may be)
          ***/
+
+
         public function getRowByID($collection, $id, $slaveOkay=true){
             return $this->getRow($collection, array('_id' => new MongoId($id)), array(), $slaveOkay);
         }
         
+        public function fetchByID($collection, $id, $slaveOkay=true){
+            return $this->getRow($collection, array('_id' => new MongoId($id)), array(), $slaveOkay);
+        }
         
         /***
          *  @param  $collection String  Name of the Collection (Table) to query
@@ -209,7 +237,6 @@
                     $return[(string)$obj[$key]] = $obj;
                 }
             }
-
             //adding debug info where neccessary            
             $this->debug('<span style="color:#0A0;">getAssoc</span> from '.$collection.' with filter:<br />'.print_r($filter,true).'<br />key is: '.$key.'<br />Order: '.print_r($order,true).'<br />Start: '.$start.'<br />Offset:'.$offset);            
             return $return;
@@ -225,6 +252,10 @@
         public function insert($collection, Array $document){
             $this->db->$collection->insert($document);            
             $this->debug('<span style="color:#0A0;">Inserted</span> Document into '.$collection.':<br />'.print_r($document, true));
+        }
+
+        public function query($collection, Array $document) {
+            return $this->insert($collection, $document);
         }
         
         
@@ -258,7 +289,6 @@
             return $this->db->$collection->update($filter, $data, $options);
         }
         
-
         /***
          *  Same as update with will alter maximum of one record
          *
@@ -285,11 +315,9 @@
         public function updateOneByID($collection, $id, Array $data, Array $options=null){
             //update one record only
             $options['multiple'] = false;
-
-			if (!($id instanceof MongoId)) {
-				$id = new MongoId($id);
-			}
-
+      if (!($id instanceof MongoId)) {
+        $id = new MongoId($id);
+      }
             return $this->update($collection, array('_id' => $id), $data, $options);
         }
         
@@ -305,8 +333,6 @@
         public function updateByID($collection, $id, Array $data, Array $options=null){
             return $this->updateOneByID($collection, $id, $data, $options);
         }
-
-
         /***
          *  @param  $collection String  Name of the Collection (Table) to query
          *  @param  $filter     Array   Filter settings to use
@@ -328,10 +354,9 @@
          *  @return boolean
          ***/
         public function deleteByID($collection, $id){
-			if (!($id instanceof MongoId)) {
-				$id = new MongoId($id);
-			}
-
+      if (!($id instanceof MongoId)) {
+        $id = new MongoId($id);
+      }
             return $this->delete($collection, array('_id' => $id), true);
         }
         
@@ -379,7 +404,6 @@
             }
             return $return;
         }
-
         
         /***
          *  Executes some other Mongo Command vie the "command" method internal to mongodb
